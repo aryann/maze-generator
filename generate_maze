@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+import cStringIO
+import os
+
+
+_RIGHT_WALL = 0b01
+_BOTTOM_WALL = 0b10
+
+
+class Maze(object):
+
+    def __init__(self, n):
+        self.maze = []
+        for _ in xrange(n):
+            self.maze.append([_RIGHT_WALL | _BOTTOM_WALL] * n)
+
+
+    def __str__(self):
+        buf = cStringIO.StringIO()
+        for _ in self.maze[0]:
+            buf.write('+')
+            buf.write('--')
+        buf.write('+')
+        buf.write(os.linesep)
+        for row in self.maze:
+            buf.write('|')
+            for cell in row:
+                buf.write('  ')
+                if cell & _RIGHT_WALL:
+                    buf.write('|')
+                else:
+                    buf.write('  ')
+            buf.write(os.linesep)
+            buf.write('+')
+            for cell in row:
+                if cell & _BOTTOM_WALL:
+                    buf.write('--')
+                else:
+                    buf.write(' ')
+                buf.write('+')
+            buf.write(os.linesep)
+        return buf.getvalue()
+
+
+if __name__ == '__main__':
+    maze = Maze(10)
+    print maze
