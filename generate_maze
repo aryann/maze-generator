@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""A simple maze generator."""
 import argparse
 import cStringIO
 import random
