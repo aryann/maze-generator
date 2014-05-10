@@ -147,7 +147,9 @@ class Maze(object):
                 else:
                     buf.write('  ')
                 buf.write('+')
-            buf.write(os.linesep)
+
+            if i != len(self.maze) - 1:
+                buf.write(os.linesep)
         return buf.getvalue()
 
 
