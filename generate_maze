@@ -51,9 +51,31 @@ class Maze(object):
         for _ in xrange(n):
             self.maze.append([_BOTH_WALLS] * n)
 
-        # Just to make sure _RamoveWall works, let's run it 10 times.
-        for _ in range(10):
+        # Removes the right wall from the exit cell.
+        self.maze[n - 1][n - 1] = _BOTTOM_WALL
+
+        self.groups = _Groups(n * n)
+        self.start_group_id = 0
+        self.exit_group_id = n * n - 1
+
+        while not self._StartAndExitConnected():
             self._RemoveWall()
+
+    def _CellToGroupId(self, cell):
+        """Maps a (row, col) tuple to a group ID."""
+        row, col = cell
+        return row * self.n + col
+
+    def _ConnectCells(self, cell_a, cell_b):
+        """Marks cell_a and cell_b as connected."""
+        group_a = self._CellToGroupId(cell_a)
+        group_b = self._CellToGroupId(cell_b)
+        self.groups.Unionize(group_a, group_b)
+
+    def _StartAndExitConnected(self):
+        """Returns True if the start and exit cells can be reached from one
+        another."""
+        return self.groups.InSameGroup(self.start_group_id, self.exit_group_id)
 
     def _RemoveWall(self):
         row = random.randint(0, self.n - 1)
@@ -85,17 +107,29 @@ class Maze(object):
             wall_to_remove = random.choice([_BOTTOM_WALL, None])
 
         if wall_to_remove:
+            this_cell = (row, col)
+            if wall_to_remove == _RIGHT_WALL:
+                neighbor = (row, col + 1)
+            else:
+                neighbor = (row + 1, col)
+
+            self._ConnectCells(this_cell, neighbor)
             self.maze[row][col] = self.maze[row][col] & ~wall_to_remove
 
     def __str__(self):
+        """Returns a string representation of the maze."""
         buf = cStringIO.StringIO()
         for _ in self.maze[0]:
             buf.write('+')
             buf.write('--')
         buf.write('+')
         buf.write(os.linesep)
-        for row in self.maze:
-            buf.write('|')
+        for i, row in enumerate(self.maze):
+            if i == 0:  # Don't add a left wall for the start cell.
+                buf.write(' ')
+            else:
+                buf.write('|')
+
             for cell in row:
                 buf.write('  ')
                 if cell & _RIGHT_WALL:
