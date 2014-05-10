@@ -20,11 +20,12 @@ class _Groups(object):
                 'member_id must be in the range [0, {0}]; received: {1}'
                 .format(len(self.groups) - 1, member_id))
 
-        while self.groups[member_id] != member_id:
-            member_id = self.groups[member_id]
-
-        # TODO: At some point, we should do some path compression here.
-        return member_id
+        if self.groups[member_id] == member_id:
+            return member_id
+        else:
+            group_id = self._FindGroupId(self.groups[member_id])
+            self.groups[member_id] = group_id
+            return group_id
 
     def Unionize(self, member_id_a, member_id_b):
         group_a = self._FindGroupId(member_id_a)
