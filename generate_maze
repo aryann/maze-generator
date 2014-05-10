@@ -6,15 +6,21 @@ import os
 
 _RIGHT_WALL = 0b01
 _BOTTOM_WALL = 0b10
+_BOTH_WALLS = _RIGHT_WALL | _BOTTOM_WALL
 
 
 class Maze(object):
 
     def __init__(self, n):
+        if n < 1:
+            raise ValueError(
+                'the dimensions of the maze must be positive; received: {0}'
+                .format(n))
+
         self.maze = []
         self.n = n
         for _ in xrange(n):
-            self.maze.append([_RIGHT_WALL | _BOTTOM_WALL] * n)
+            self.maze.append([_BOTH_WALLS] * n)
 
         # Just to make sure _RamoveWall works, let's run it 10 times.
         for _ in range(10):
@@ -23,8 +29,34 @@ class Maze(object):
     def _RemoveWall(self):
         row = random.randint(0, self.n - 1)
         col = random.randint(0, self.n - 1)
-        wall_to_remove = random.choice([_RIGHT_WALL, _BOTTOM_WALL])
-        self.maze[row][col] = self.maze[row][col] & ~wall_to_remove
+
+        # We don't want to remove walls that are part of the right or
+        # bottom border. We also want to make sure that the
+        # probability of an internal wall being removed is uniform
+        # among all walls.
+
+        # If the cell is neither in the bottom-most row nor in the
+        # right-most column, we can go ahead and pick between removing
+        # either a right wall or a bottom wall.
+        if row != self.n - 1 and col != self.n - 1:
+            wall_to_remove = random.choice([_RIGHT_WALL, _BOTTOM_WALL])
+
+        # If the cell is the exit cell, then the right and bottom walls
+        # are both part of the border, so we should not remove them.
+        elif row == self.n - 1 and col == self.n - 1:
+            wall_to_remove = None
+
+        # If the cell is in the bottom row, then either remove a right
+        # wall or do nothing.
+        elif row == self.n - 1:
+            wall_to_remove = random.choice([_RIGHT_WALL, None])
+
+        # Similar to the above condition, except for the right-most column.
+        elif col == self.n - 1:
+            wall_to_remove = random.choice([_BOTTOM_WALL, None])
+
+        if wall_to_remove:
+            self.maze[row][col] = self.maze[row][col] & ~wall_to_remove
 
     def __str__(self):
         buf = cStringIO.StringIO()
