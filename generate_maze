@@ -3,6 +3,7 @@ import argparse
 import cStringIO
 import random
 import os
+import sys
 
 
 _RIGHT_WALL = 0b01
@@ -161,5 +162,10 @@ if __name__ == '__main__':
               'generated.'))
 
     args = parser.parse_args()
+    if args.size < 1:
+        sys.stderr.write('size must be a positive integer; received: {0}\n'
+                         .format(args.size))
+        sys.exit(1)
+
     maze = Maze(args.size)
     print maze
