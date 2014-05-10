@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import argparse
 import cStringIO
 import random
 import os
@@ -150,5 +151,15 @@ class Maze(object):
 
 
 if __name__ == '__main__':
-    maze = Maze(10)
+    parser = argparse.ArgumentParser(description='A simple maze generator')
+    parser.add_argument(
+        'size',
+        default=10,
+        type=int,
+        nargs='?',
+        help=('Specifies the dimensions of the maze. Only square mazes can be '
+              'generated.'))
+
+    args = parser.parse_args()
+    maze = Maze(args.size)
     print maze
