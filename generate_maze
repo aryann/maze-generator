@@ -9,6 +9,35 @@ _BOTTOM_WALL = 0b10
 _BOTH_WALLS = _RIGHT_WALL | _BOTTOM_WALL
 
 
+class _Groups(object):
+
+    def __init__(self, num_members):
+        self.groups = range(num_members)
+
+    def _FindGroupId(self, member_id):
+        if not (0 <= member_id < len(self.groups)):
+            raise ValueError(
+                'member_id must be in the range [0, {0}]; received: {1}'
+                .format(len(self.groups) - 1, member_id))
+
+        while self.groups[member_id] != member_id:
+            member_id = self.groups[member_id]
+
+        # TODO: At some point, we should do some path compression here.
+        return member_id
+
+    def Unionize(self, member_id_a, member_id_b):
+        group_a = self._FindGroupId(member_id_a)
+        group_b = self._FindGroupId(member_id_b)
+        if group_a < group_b:
+            self.groups[group_b] = group_a
+        elif group_b < group_a:
+            self.groups[group_a] = group_b
+
+    def InSameGroup(self, member_id_a, member_id_b):
+        return self._FindGroupId(member_id_a) == self._FindGroupId(member_id_b)
+
+
 class Maze(object):
 
     def __init__(self, n):
